@@ -1,0 +1,3 @@
+[submodule "Yolo_TensorRT"]
+	path = Yolo_TensorRT
+	url = https://github.com/Rachelslh/Yolo_TensorRT
