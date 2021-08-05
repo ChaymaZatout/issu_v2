@@ -48,7 +48,7 @@ if __name__ == "__main__":
     print('Client initialization ...')
     semantic_classes = {"bench": 2, "chair": 2, "sofa": 2, "bed": 2,
                      "diningtable": 3, "sink": 3, "toilet": 4}
-    previous_class = 0
+    previous_class = -1
     client = Client()
 
     # YOLO conf:
@@ -70,9 +70,9 @@ if __name__ == "__main__":
 
     if cap.isOpened():
         h, w = 480, 640
-        window_handle = cv2.namedWindow("Yolo", cv2.WINDOW_AUTOSIZE)
+        window_handle = cv2.namedWindow("Obstacle detection", cv2.WINDOW_AUTOSIZE)
         # Window
-        while cv2.getWindowProperty("Yolo", 0) >= 0:
+        while cv2.getWindowProperty("Obstacle detection", 0) >= 0:
             # Read data:
             ret_val, img = cap.read()
             # resize:
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
             # Visualize the detection:
             img = vis.draw_bboxes(img, boxes, confs, clss)
-            cv2.imshow("Yolo", img)
+            cv2.imshow("Obstacle detection", img)
 
             # Get classes:
             semantic_class = 0
