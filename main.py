@@ -10,7 +10,9 @@ from Yolo_TensorRT.utils.camera import add_camera_args, Camera
 from Yolo_TensorRT.utils.display import open_window, set_display, show_fps
 from Yolo_TensorRT.utils.visualization import BBoxVisualization
 from Yolo_TensorRT.utils.yolo_with_plugins import TrtYOLO
+
 import numpy as np
+from client import Client
 
 
 def gstreamer_pipeline(
@@ -43,9 +45,11 @@ def gstreamer_pipeline(
 
 if __name__ == "__main__":
     # classes :
+    print('Client initialization ...')
     semantic_classes = {"bench": 2, "chair": 2, "sofa": 2, "bed": 2,
                      "diningtable": 3, "sink": 3, "toilet": 4}
     previous_class = 0
+    client = Client()
 
     # YOLO conf:
     print('Yolo initialization ...')
@@ -100,7 +104,8 @@ if __name__ == "__main__":
             # Send to server:
             if semantic_class != previous_class:
                 previous_class = semantic_class
-                print("changed!")
+                data = semantic_class, 2
+                client.send_data(*data)
 
             # Stop the program on the ESC key
             keyCode = cv2.waitKey(1) & 0xFF
