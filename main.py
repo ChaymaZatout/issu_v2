@@ -10,6 +10,7 @@ from Yolo_TensorRT.utils.camera import add_camera_args, Camera
 from Yolo_TensorRT.utils.display import open_window, set_display, show_fps
 from Yolo_TensorRT.utils.visualization import BBoxVisualization
 from Yolo_TensorRT.utils.yolo_with_plugins import TrtYOLO
+import numpy as np
 
 
 def gstreamer_pipeline(
@@ -41,6 +42,11 @@ def gstreamer_pipeline(
 
 
 if __name__ == "__main__":
+    # classes :
+    semantic_classes = {"bench": 2, "chair": 2, "sofa": 2, "bed": 2,
+                     "diningtable": 3, "sink": 3, "toilet": 4}
+    previous_class = 0
+
     # YOLO conf:
     print('Yolo initialization ...')
     model = "yolov4-416"  # in yolo dir
@@ -49,8 +55,10 @@ if __name__ == "__main__":
     start = time.time()
     trt_yolo = TrtYOLO(model, category_num, letter_box)
     print('__time__' + str(time.time() - start) + ' s.')
+    # Inference variables :
     conf_th = 0.3
     cls_dict = get_cls_dict(category_num)
+    vis = BBoxVisualization(cls_dict)
 
     # CAMERA:
     print(gstreamer_pipeline(flip_method=0))
@@ -73,14 +81,26 @@ if __name__ == "__main__":
             boxes, confs, clss = trt_yolo.detect(img, conf_th)
             print('__time__' + str(time.time() - start) + ' s.')
 
-            # Get classes:
-
             # Visualize the detection:
-            vis = BBoxVisualization(cls_dict)
             img = vis.draw_bboxes(img, boxes, confs, clss)
             cv2.imshow("Yolo", img)
 
+            # Get classes:
+            semantic_class = 0
+            if len(confs) > 0:
+                max_p = np.argmax(confs)
+                cl = int(clss[max_p])
+                cls_name = cls_dict.get(cl, 'CLS{}'.format(cl))
+                print(cls_name+" : " + str(confs[max_p]))
+                if cls_name in semantic_classes.keys():
+                    semantic_class = semantic_classes[cls_name]
+                else:
+                    semantic_class = 1
+
             # Send to server:
+            if semantic_class != previous_class:
+                previous_class = semantic_class
+                print("changed!")
 
             # Stop the program on the ESC key
             keyCode = cv2.waitKey(1) & 0xFF
