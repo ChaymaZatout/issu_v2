@@ -37,12 +37,19 @@ def compute_distance(bb, cls):
 
 
 if __name__ == '__main__':
-    # video:
-    cap = cv2.VideoCapture('/home/chim/Documents/aim-x challenge/v2/demos/chair_2.avi')
+    # video reader:
+    path = '/home/chim/Documents/aim-x challenge/v2/demos/'
+    video_name = 'chair_2.avi'
+    cap = cv2.VideoCapture(path+video_name)
     h, w = 480, 640
     # Check if camera opened successfully
     if (cap.isOpened() == False):
         print("Error opening video stream or file")
+
+    # video writer:
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter(path+'detection_'+video_name, fourcc, 20.0, (416, 416))
 
     # classes :
     print('Client initialization ...')
@@ -85,6 +92,7 @@ if __name__ == '__main__':
             # Visualize the detection:
             img = vis.draw_bboxes(img, boxes, confs, clss)
             cv2.imshow("Obstacle detection", img)
+            out.write(img)
 
             # Get classes:
             semantic_class = 0
@@ -118,6 +126,6 @@ if __name__ == '__main__':
 
     # When everything done, release the video capture object
     cap.release()
-
+    out.release()
     # Closes all the frames
     cv2.destroyAllWindows()
